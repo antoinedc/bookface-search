@@ -106,6 +106,10 @@ Once installed, Claude Code will automatically detect the skill. When you're doi
 
 You can also invoke it directly with `/bookface`.
 
+## Works Great with RenderKit
+
+For a richer research experience, pair this skill with [RenderKit](https://renderkit.live/) to display search results and research summaries as beautiful, interactive documents.
+
 ## Troubleshooting
 
 **Authentication fails:**
