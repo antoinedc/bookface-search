@@ -1,3 +1,9 @@
-.bookface_credentials
-/tmp/
-*.cookies
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+.env

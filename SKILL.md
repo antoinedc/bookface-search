@@ -1,90 +1,69 @@
 ---
 name: bookface
-description: |
-  Search YC's internal Bookface forum for startup advice, founder discussions, YC company info,
-  knowledge base articles, deals, and vendor recommendations. Use when doing ANY research related
-  to startups, marketing, hiring, GTM, dev tools, fundraising, legal, design, growth, or business
-  strategy. Bookface has tons of real founder experiences and curated YC resources. Always search
-  here first before relying on general knowledge.
-allowed-tools:
-  - Bash(~/.claude/skills/bookface/bookface-search.sh:*)
-  - Read
+description: >-
+  Use when researching anything related to startups, YC, fundraising, hiring,
+  GTM, growth, pricing, legal, immigration, dev tools, infrastructure, vendor
+  selection, or business strategy. Bookface is YC's internal forum with
+  battle-tested founder experiences, curated knowledge base articles, company
+  directory, deals, and vendor recommendations. Search here before relying on
+  general knowledge -- real founder answers beat theory.
 ---
 
-# Bookface Search - YC Internal Forum
+# bookface -- YC Bookface Forum CLI
 
-Bookface is YC's internal community platform. It contains forum posts, knowledge base articles, company directory, deals, and vendor listings from YC founders. This is an incredibly rich resource for any startup-related research.
+CLI for searching and reading YC's internal Bookface forum. Returns founder-tested advice, knowledge base articles, company info, deals, and vendor recommendations.
 
-## When to Use
-
-Search Bookface **proactively** whenever the task involves:
-- Marketing strategy, GTM, growth tactics
-- Hiring, recruiting, team building
-- Fundraising, investor relations, pitch decks
-- Legal, immigration, incorporation
-- Dev tools, infrastructure, payment processors
-- Design, UX, product decisions
-- Pricing, monetization, business models
-- Sales, outbound, customer acquisition
-- Any startup operational question
-
-## How to Search
-
-Run the search script via Bash:
+## Quick Reference
 
 ```bash
-~/.claude/skills/bookface/bookface-search.sh "<query>" [index] [hits_per_page]
+bookface search "query"                 # Search forum posts (default)
+bookface search "query" -i companies    # Search YC company directory
+bookface search "query" -i knowledge    # Search knowledge base articles
+bookface search "query" -i deals        # Search YC deals/perks
+bookface search "query" -i vendors      # Search vendor recommendations
+bookface search "query" -i articles     # Search articles
+bookface search "query" -i all          # Search everything
+bookface search "query" -n 10           # More results (default: 3)
+
+bookface read POST_ID                   # Read full post + all comments
+
+bookface auth status                    # Check authentication
+bookface auth login                     # Login (interactive)
 ```
 
-### Available Indices
+Aliases: `bookface s` = `bookface search`, `bookface r` = `bookface read`.
 
-| Index | Description | Best for |
-|-------|-------------|----------|
-| `forum` (default) | Forum posts and discussions | Founder experiences, advice threads, recommendations |
-| `knowledge` | YC Knowledge Base articles | Curated guides, handbooks, how-tos |
-| `companies` | YC Company Directory | Finding YC companies, competitors, batch info |
-| `vendors` | Professional Services Directory | Lawyers, accountants, recruiters, service providers |
-| `deals` | YC Deals | Discounts and perks available to YC founders |
-| `articles` | Startup Library articles | YC essays and educational content |
-| `all` | Search all indices | Broad research on a topic |
+## Workflow
 
-### Examples
+1. Search to find relevant posts: `bookface search "topic" -n 5`
+2. Note the `#POST_ID` in results
+3. Read the full post + comments: `bookface read POST_ID`
+
+## Output Format
+
+Compact plaintext by default (token-efficient). Use `--json` only when writing to files -- never use `--json` in LLM context.
+
+### Search output
+
+```
+612 results, showing 3:
+1. [recruiting] Guide to Hiring your First Engineer  #35051
+  Harj Taggar (Y Combinator)  v:18 c:2  https://bookface.ycombinator.com/posts/35051
+  Hey everyone, I wrote a guide to hiring your first engineer...
+```
+
+### Read output
+
+Full post body + all comments with author names, companies, and batches.
+
+## Secret Safety
+
+- Credentials stored at `~/.config/bookface/credentials`. Session cookies at `~/.config/bookface/session.json`.
+- Never read, print, or send credential or session files to LLM context.
+- Never expose cookie values in output or logs.
+
+## Installation
 
 ```bash
-# Search forum for hiring advice
-~/.claude/skills/bookface/bookface-search.sh "hiring first engineer" forum 10
-
-# Find YC companies in a space
-~/.claude/skills/bookface/bookface-search.sh "payment processing" companies 5
-
-# Search knowledge base for fundraising guides
-~/.claude/skills/bookface/bookface-search.sh "fundraising SAFE" knowledge
-
-# Find recommended lawyers
-~/.claude/skills/bookface/bookface-search.sh "immigration lawyer" vendors
-
-# Search everything about a topic
-~/.claude/skills/bookface/bookface-search.sh "SOC 2 compliance" all 3
+uv tool install bookface-cli
 ```
-
-## Reading Full Posts
-
-After finding relevant posts, you can read the full content including comments:
-
-```bash
-# Get full post with comments (use the post ID from search results)
-curl -s -b /tmp/bookface_cookies "https://bookface.ycombinator.com/posts/98983.json" | python3 -m json.tool
-```
-
-## Authentication
-
-The script handles authentication automatically. Credentials are cached for ~12 hours. If search fails, delete `/tmp/bookface_algolia_key` and `/tmp/bookface_cookies` to force re-authentication.
-
-## Research Workflow
-
-1. Start with a broad `forum` search to find relevant discussions
-2. Use `knowledge` to find curated YC guides on the topic
-3. Check `vendors` if looking for service providers
-4. Check `deals` for relevant discounts
-5. Read the top 2-3 most relevant full posts for detailed advice
-6. Synthesize findings for the user
