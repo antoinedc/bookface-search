@@ -23,7 +23,7 @@ bookface search "query" -i deals        # Search YC deals/perks
 bookface search "query" -i vendors      # Search vendor recommendations
 bookface search "query" -i articles     # Search articles
 bookface search "query" -i all          # Search everything
-bookface search "query" -n 10           # More results (default: 3)
+bookface search "query" -n 10           # More results (default: 5)
 
 bookface read POST_ID                   # Read full post + all comments
 

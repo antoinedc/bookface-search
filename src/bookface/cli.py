@@ -14,9 +14,6 @@ def main():
     p.add_argument("--version", action="version", version=f"bookface {__version__}")
     sub = p.add_subparsers(dest="command")
 
-    # Shared flags
-    json_flag = {"flags": ["--json"], "action": "store_true", "help": "JSON output"}
-
     # auth
     auth_p = sub.add_parser("auth", help="Authentication management")
     auth_sub = auth_p.add_subparsers(dest="auth_command")
