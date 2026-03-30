@@ -68,15 +68,17 @@ bookface search "query" --json
 ```bash
 bookface auth login     # Interactive login
 bookface auth status    # Check auth state
+bookface auth logout    # Clear session
 ```
 
 Credentials are stored at `~/.config/bookface/credentials`. Session cookies are cached at `~/.config/bookface/session.json` and refresh automatically.
 
 ## As a Claude Code Skill
 
-Install the skill:
+Install the CLI and the skill:
 
 ```bash
+uv tool install bookface-cli
 git clone https://github.com/antoinedc/bookface-search.git ~/.claude/skills/bookface
 ```
 
