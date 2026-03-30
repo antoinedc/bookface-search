@@ -1,56 +1,50 @@
-# Bookface Search - Claude Code Skill
+# Bookface CLI
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that searches YC's internal [Bookface](https://bookface.ycombinator.com) forum. Gives your AI assistant access to thousands of YC founder discussions, knowledge base articles, company directory, deals, and vendor recommendations.
+A CLI for searching and reading YC's internal [Bookface](https://bookface.ycombinator.com) forum. Works standalone or as a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill.
+
+Gives your AI assistant (or you) access to thousands of YC founder discussions, knowledge base articles, company directory, deals, and vendor recommendations.
 
 ## Requirements
 
 - A Bookface account (YC founders/alumni only)
-- `curl` and `python3` (pre-installed on macOS/Linux)
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+- Python 3.10+
+- [uv](https://github.com/astral-sh/uv) (recommended) or pip
 
 ## Installation
 
-### 1. Clone the repo into your Claude Code skills directory
-
 ```bash
-git clone https://github.com/antoinedc/bookface-search.git ~/.claude/skills/bookface
+uv tool install bookface-cli
 ```
 
-### 2. Make the script executable
+Or from source:
 
 ```bash
-chmod +x ~/.claude/skills/bookface/bookface-search.sh
-```
-
-### 3. Set up your credentials
-
-Create a credentials file (this file is gitignored):
-
-```bash
-cat > ~/.bookface_credentials << 'EOF'
-BOOKFACE_USERNAME="your_yc_username"
-BOOKFACE_PASSWORD="your_yc_password"
-EOF
-chmod 600 ~/.bookface_credentials
-```
-
-Or set environment variables:
-
-```bash
-export BOOKFACE_USERNAME="your_yc_username"
-export BOOKFACE_PASSWORD="your_yc_password"
-```
-
-### 4. Test it
-
-```bash
-~/.claude/skills/bookface/bookface-search.sh "best payment processor"
+git clone https://github.com/antoinedc/bookface-search.git
+cd bookface-search
+uv tool install -e .
 ```
 
 ## Usage
 
-```
-bookface-search.sh <query> [index] [hits_per_page]
+```bash
+# Search forum posts (default)
+bookface search "hiring first engineer"
+
+# Search specific index
+bookface search "stripe" -i companies
+bookface search "immigration lawyer" -i vendors
+bookface search "fundraising SAFE" -i knowledge
+bookface search "SOC 2 compliance" -i deals
+bookface search "pricing strategy" -i all
+
+# Control result count
+bookface search "hiring" -n 10
+
+# Read full post with comments
+bookface read POST_ID
+
+# JSON output (for piping to files)
+bookface search "query" --json
 ```
 
 ### Search Indices
@@ -65,58 +59,43 @@ bookface-search.sh <query> [index] [hits_per_page]
 | `articles` | Startup Library articles |
 | `all` | Search all indices at once |
 
-### Examples
+### Aliases
+
+`bookface s` = `bookface search`, `bookface r` = `bookface read`.
+
+## Authentication
 
 ```bash
-# Search forum (default)
-bookface-search.sh "hiring first engineer"
-
-# Search specific index
-bookface-search.sh "stripe" companies
-bookface-search.sh "immigration lawyer" vendors
-bookface-search.sh "fundraising SAFE" knowledge
-
-# Control result count
-bookface-search.sh "SOC 2 compliance" forum 10
-
-# Search everything
-bookface-search.sh "pricing strategy" all 3
+bookface auth login     # Interactive login
+bookface auth status    # Check auth state
 ```
 
-### Reading Full Posts
-
-After finding a relevant post, read the full content:
-
-```bash
-curl -s -b /tmp/bookface_cookies \
-  "https://bookface.ycombinator.com/posts/POST_ID.json" \
-  | python3 -m json.tool
-```
-
-## How It Works
-
-1. Authenticates with Bookface via YC's SSO (credentials cached for ~12h)
-2. Extracts session-scoped Algolia search credentials
-3. Queries Algolia's search API directly (fast, no browser needed)
-4. Formats results with titles, authors, vote counts, and preview text
+Credentials are stored at `~/.config/bookface/credentials`. Session cookies are cached at `~/.config/bookface/session.json` and refresh automatically.
 
 ## As a Claude Code Skill
 
-Once installed, Claude Code will automatically detect the skill. When you're doing any research related to startups, marketing, hiring, GTM, fundraising, legal, or business strategy, Claude will search Bookface for relevant founder discussions and curated YC resources.
+Install the skill:
 
-You can also invoke it directly with `/bookface`.
+```bash
+git clone https://github.com/antoinedc/bookface-search.git ~/.claude/skills/bookface
+```
 
-## Works Great with RenderKit
+Claude Code will automatically detect the `SKILL.md` and use Bookface when researching startup topics -- marketing, hiring, GTM, fundraising, legal, pricing, vendor selection, and more.
 
-For a richer research experience, pair this skill with [RenderKit](https://renderkit.live/) to display search results and research summaries as beautiful, interactive documents.
+## How It Works
+
+1. Authenticates with Bookface via YC's SSO
+2. Extracts session-scoped Algolia search credentials
+3. Queries Algolia's search API directly (fast, no browser needed)
+4. Formats results with titles, authors, vote counts, and preview text
 
 ## Troubleshooting
 
 **Authentication fails:**
 ```bash
-rm /tmp/bookface_cookies /tmp/bookface_algolia_key
+rm -rf ~/.config/bookface/session.json
+bookface auth login
 ```
-Then try again. This forces a fresh login.
 
 **No results:**
 - Check that your Bookface account has access to the content
